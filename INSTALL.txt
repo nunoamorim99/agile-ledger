@@ -12,3 +12,8 @@ SKILL ONLY (no slash commands, driven by natural language):
   (the skill auto-triggers when you ask for backlog/sprint work).
 
 A fresh project scaffolds the eight ledger files on first use.
+
+---
+Maintainers: in the repository, the top-level  skills/  and  commands/agile-ledger/  folders are
+GENERATED from  plugins/agile-ledger/  — edit the plugin copy and run  scripts/sync-mirror.sh .
+See CONTRIBUTING.md. (This note does not apply to the distributed bundle.)
