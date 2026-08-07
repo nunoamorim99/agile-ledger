@@ -2,37 +2,44 @@
 
 ## Repository layout — one source of truth
 
-The plugin's commands and skills exist twice on purpose, and **only one copy is editable**:
+**Everything lives in `plugins/agile-ledger/`. Edit only there.**
 
-| Path | Role |
+That single directory feeds all three install paths:
+
+| Install path | How it gets the files |
 |---|---|
-| `plugins/agile-ledger/commands/`, `plugins/agile-ledger/skills/` | ✅ **Source of truth — edit here** |
-| `commands/agile-ledger/`, `skills/` | 🤖 Generated mirror — **never hand-edit** |
+| Marketplace (`/plugin install agile-ledger@nunoamorim99`) | Served directly from `plugins/agile-ledger/` |
+| Manual `.claude/` drop-in | `agile-ledger-<version>.zip`, built from it on release |
+| Claude.ai web/desktop | `agile-ledger-skill-<version>.zip`, built from it on release |
 
-Why the duplication can't simply be deleted: a marketplace plugin's root is a hard boundary. Paths
-that traverse above `plugins/agile-ledger/` are not copied into the plugin cache on install, so the
-files must physically live inside the plugin directory. The top-level copy exists to serve the
-"drop into your `.claude/` folder" install described in [INSTALL.txt](INSTALL.txt), where commands are
-namespaced by directory (`commands/agile-ledger/idea.md` → `/agile-ledger:idea`) instead of by plugin
-name.
+A marketplace plugin's root is a hard boundary — paths above `plugins/agile-ledger/` are not copied
+into the plugin cache on install — so the files must physically live inside the plugin. The manual
+bundles are therefore *built* from it rather than kept as a second committed copy.
 
-### Workflow
-
-Edit under `plugins/agile-ledger/`, then regenerate the mirror before committing:
+### Building the bundles
 
 ```sh
-scripts/sync-mirror.sh
+python3 scripts/build_bundles.py           # writes dist/*.zip
+python3 scripts/build_bundles.py --check   # build, then assert the contents (this is what CI runs)
 ```
 
-To check without writing anything (this is what CI runs):
+`dist/` is gitignored — the zips are release artifacts, never committed. The full bundle nests
+commands one level deeper than the plugin does (`commands/agile-ledger/idea.md`), because a manual
+install namespaces commands by directory while a plugin namespaces them by plugin name. Both end up
+as `/agile-ledger:idea`.
 
-```sh
-scripts/sync-mirror.sh --check
-```
+## Cutting a release
 
-The mirror is deleted and recreated on every run, so any edit made directly to
-`commands/agile-ledger/` or `skills/` is silently discarded. CI fails the build if the mirror
-does not match its source.
+1. Bump `version` in **both** manifests (see [Versioning](#versioning) below).
+2. Commit and push to `main`.
+3. Tag and push:
+
+   ```sh
+   git tag v1.7.1 && git push origin v1.7.1
+   ```
+
+The `release` workflow verifies the tag matches `plugin.json`, builds both bundles, and attaches them
+to a GitHub Release. A mismatched tag fails the build rather than publishing a misleading version.
 
 ## Versioning
 
@@ -51,7 +58,10 @@ request:
 1. Both plugin manifests parse as JSON.
 2. The marketplace entry resolves to a real plugin directory, names and versions agree, and the
    required `commands/` and `skills/agile-ledger/SKILL.md` are present.
-3. The manual-install mirror is in sync with the plugin source.
+3. Both install bundles build and contain the files each one is supposed to ship.
+
+[`.github/workflows/release.yml`](.github/workflows/release.yml) runs on a `v*` tag and publishes the
+bundles to GitHub Releases.
 
 ## Ledger file conventions
 

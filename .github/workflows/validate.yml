@@ -58,5 +58,5 @@ jobs:
               sys.exit(1)
           PY
 
-      - name: Manual-install mirror is in sync with the plugin
-        run: scripts/sync-mirror.sh --check
+      - name: Install bundles build and contain the right files
+        run: python3 scripts/build_bundles.py --check

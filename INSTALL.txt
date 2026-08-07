@@ -1,19 +1,25 @@
-Agile-Ledger v1.7 — drop-in bundle (no marketplace needed)
+Agile-Ledger — installing
 
-FULL install (skills + slash commands):
-  Unzip into your project's  .claude/  folder, so you end up with:
+You are reading this inside the drop-in bundle, so you already have the files you need.
+
+FULL install (skills + slash commands)
+  Unzip this bundle into your project's  .claude/  folder, so you end up with:
     .claude/skills/agile-ledger/            (and agile-ledger-workspace/)
     .claude/commands/agile-ledger/*.md
-  Use ~/.claude/ instead of the project path to install for all your projects.
+  Use ~/.claude/ instead to install for all your projects.
   Restart Claude Code (or run /reload-plugins). Commands are namespaced: /agile-ledger:idea
 
-SKILL ONLY (no slash commands, driven by natural language):
+SKILL ONLY (no slash commands, driven by natural language)
   Copy just the  skills/agile-ledger/  folder into  .claude/skills/
   (the skill auto-triggers when you ask for backlog/sprint work).
 
 A fresh project scaffolds the eight ledger files on first use.
 
 ---
-Maintainers: in the repository, the top-level  skills/  and  commands/agile-ledger/  folders are
-GENERATED from  plugins/agile-ledger/  — edit the plugin copy and run  scripts/sync-mirror.sh .
-See CONTRIBUTING.md. (This note does not apply to the distributed bundle.)
+Prefer automatic updates? Install via the marketplace instead and you get new versions
+without re-downloading:
+
+  /plugin marketplace add nunoamorim99/agile-ledger
+  /plugin install agile-ledger@nunoamorim99
+
+Latest bundles: https://github.com/nunoamorim99/agile-ledger/releases/latest

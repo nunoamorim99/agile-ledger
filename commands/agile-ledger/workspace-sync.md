@@ -1,4 +1,0 @@
----
-description: (Workspace) Cross-repo "what changed while I was away" — discover, reconcile, and report
----
-Using the **Agile-Ledger Workspace** skill, sync all repos in `Agile-Ledger-Workspace/Registry.md`. (1) Run `/discover-repos` to catch new repositories. (2) In each known repo run the per-repo `/sync-main` reconciliation (merges to `main` since that repo's last-sync SHA, mapped to `US`/`BUG` ids case-insensitively). (3) Flag undocumented work — merges with no id — and **propose** a reconstructed Draft in that repo's `Ideas.md` for each (flagged, linked to the commit/PR). (4) Produce ONE consolidated report per repo: new / merged-and-reconciled / undocumented-drafted / unchanged, plus blocked and unreleased counts. Read-only by default — clone, draft, and reconcile only on the user's confirmation. Update each repo's last-sync SHA and the Registry's `last synced` date after review.

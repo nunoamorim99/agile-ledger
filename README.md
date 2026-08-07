@@ -192,10 +192,20 @@ marketplace and enable the plugin — no manual setup, and updates are a normal 
 
 ### Other ways
 
+Every download below is on the **[latest release](https://github.com/nunoamorim99/agile-ledger/releases/latest)** page — you don't need to clone the repo or hunt for folders.
+
+| You want | Download | Then |
+|---|---|---|
+| Claude Code without a marketplace (offline, corporate policy, or just to read the files first) | `agile-ledger-<version>.zip` | Unzip into your project's `.claude/` folder — or `~/.claude/` for every project. Restart Claude Code. |
+| Claude.ai **web or desktop** | `agile-ledger-skill-<version>.zip` | Upload via *Customize → Skills*. |
+
 - **One session, no install:** `claude --plugin-dir ./plugins/agile-ledger`
-- **Manual skill copy:** copy `plugins/agile-ledger/skills/*` into `.claude/skills/` and
-  `plugins/agile-ledger/commands/*.md` into `.claude/commands/agile-ledger/`.
-- **Claude.ai web/desktop:** upload the zipped `skills/agile-ledger/` folder via *Customize → Skills*.
+
+> Slash commands are a Claude Code feature. On Claude.ai web/desktop the skill still works, driven by
+> natural language ("add a story for…", "plan the next sprint") rather than `/agile-ledger:…`.
+>
+> Manual installs don't auto-update — grab the newer zip when a release ships. The marketplace path
+> updates itself, which is why it's the recommended one.
 
 Installed via marketplace, commands are namespaced (`/agile-ledger:idea`). After installing, restart
 Claude Code (or `/reload-plugins`) so the skills load.
@@ -241,18 +251,24 @@ each repo stays its own source of truth — and it only discovers, syncs, and *p
 ```
 agile-ledger/
 ├── .claude-plugin/marketplace.json      # marketplace catalog
-├── plugins/agile-ledger/
+├── plugins/agile-ledger/                # ← the plugin: single source of truth
 │   ├── .claude-plugin/plugin.json       # plugin manifest
 │   ├── commands/                        # 31 slash commands (+ /standup alias)
 │   └── skills/
 │       ├── agile-ledger/                # core skill — SKILL.md + references/ (8 templates)
 │       └── agile-ledger-workspace/      # optional multi-repo orchestrator
+├── scripts/build_bundles.py             # builds the release zips from the plugin
+├── install/                             # project-scope settings.json for teams
 ├── docs/assets/                         # README images (cover, group banners)
 ├── Agile-Ledger-cheatsheet.pdf
 ├── Agile-Ledger-skill-spec.md           # full design rationale
 ├── README.md
 └── LICENSE
 ```
+
+Everything ships from `plugins/agile-ledger/`. The marketplace serves it directly, and the downloadable
+zips on the [releases page](https://github.com/nunoamorim99/agile-ledger/releases/latest) are built from
+it on each tag — so there is only ever one copy to edit. See [CONTRIBUTING.md](CONTRIBUTING.md).
 
 ## License
 
