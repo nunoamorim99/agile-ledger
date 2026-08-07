@@ -9,16 +9,17 @@ Next free ID — BUG: BUG-001
 
 ## Overview
 
-| State | Bugs |
-|---|---|
-| 🐛 Inbox | 0 |
-| 🔍 Triaged | 0 |
-| 🔬 Confirmed | 0 |
-| 🛠️ In Sprint | 0 |
-| ✅ Fixed | 0 |
-| ❄️ Deferred / 🚫 Won't fix | 0 |
+🐛 Inbox 0 · 🔍 Triaged 0 · 🔬 Confirmed 0 · 🛠️ In Sprint 0 · ✅ Fixed 0 · ❄️ Deferred / 🚫 Won't fix 0
 
 Open by priority: 🔴 0 · 🟡 0 · 🟢 0
+
+_Every identified bug below, in section order (Triaged → Confirmed → In Sprint → Fixed → Deferred);
+highest priority first within each group. Click an ID to jump to its detail. Rows are kept forever.
+🐛 Inbox reports have no ID yet — they are counted above but get a row only once `/triage-bug` runs._
+
+| ID | Title | State | Sev | Pri | Relates to | Assignee |
+|---|---|---|---|---|---|---|
+<!-- | [BUG-001](#bug-001) | Safari sign-in does nothing | 🔍 Triaged | major | 🔴 | [US-002](User-Stories.md#us-002) | @dev | -->
 
 ---
 

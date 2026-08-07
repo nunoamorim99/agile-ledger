@@ -99,10 +99,16 @@ separately in `Ideas.md` until `/triage` promotes them, so the epic backlog stay
   **coarse** state (`In Sprint`). `/ledger-check` reconciles index ↔ detail ↔ board.
 - **Epic index coarse states:** `Draft · Ready · In Sprint · Delivered · Paused · Discarded`. The live
   board columns are shown by `/board`.
-- **Overview tables (top of each file):** `Epic-Backlog.md` opens with an **epic dashboard**
-  (`Epic · Title · Status · Stories done/total · Points done/total · Target`); `User-Stories.md` opens
-  with a **state summary** (`State · Stories · Points`). Commands that change a story's state refresh the
-  affected table(s).
+- **Overview tables (top of each file):** every backlog file opens with a one-line **roll-up** of the
+  state counts followed by a **per-item index table whose ID cell links to that item's entry**, so the
+  top of the file works as a jump list. `Epic-Backlog.md` — epic dashboard
+  (`Epic · Title · Status · Stories done/total · Points done/total · Target`); `User-Stories.md` —
+  (`ID · Title · State · Pri · Pts · Epic · Assignee`); `Bugs.md` —
+  (`ID · Title · State · Sev · Pri · Relates to · Assignee`) plus `Open by priority`.
+  Rows follow the file's own section order (active work first, done last), highest priority first within
+  a group, and are **kept forever** so every anchor stays reachable. Tables are **derived, never
+  hand-typed**: any command that changes an item's state, priority, estimate, assignee, or title rebuilds
+  the affected table(s). Exact shapes in `references/entry-templates.md`.
 
 If a project starts with no `Agile-Ledger/` folder, scaffold all eight files from the
 `references/*.template.md` files before doing anything else.

@@ -31,17 +31,52 @@ absolute (`YYYY-MM-DD`), the human's voice preserved.
 | [EPIC-005](#epic-005) | User onboarding | 🔨 In Progress | 4/7 | 18/34 | v3.0 |
 ```
 
-**`User-Stories.md` — state summary**:
+**`User-Stories.md` — roll-up line + story index.** The roll-up gives the numbers at a glance; the
+index table below it lists **every** story so the reader can jump straight to any entry from the top of
+the file. The ID cell links to the entry's anchor in the same file; the Epic cell links across to
+`Epic-Backlog.md`.
 
 ```markdown
-| State | Stories | Points |
-|---|---|---|
-| ✅ Ready | 8 | 34 |
-| 🏃 In Sprint | 5 | 21 |
-| ✅ Delivered | 30 | 142 |
+✅ Ready 8 (34 pts) · 🏃 In Sprint 5 (21 pts) · ✅ Delivered 30 (142 pts) · ❄️ Paused 1 (3 pts) · 🗑️ Discarded 2 (—)
+
+| ID | Title | State | Pri | Pts | Epic | Assignee |
+|---|---|---|---|---|---|---|
+| [US-031](#us-031) | Magic-link login | ✅ Ready | 🟡 | 3 | [EPIC-005](Epic-Backlog.md#epic-005) | — |
+| [US-014](#us-014) | Google SSO login | 🏃 In Sprint | 🔴 | 5 | [EPIC-005](Epic-Backlog.md#epic-005) | @rita |
+| [US-012](#us-012) | Email signup | ✅ Delivered | 🔴 | 5 | [EPIC-005](Epic-Backlog.md#epic-005) | @rita |
 ```
 
-**`Bugs.md` — state summary** + `Open by priority: 🔴 n · 🟡 n · 🟢 n`.
+**`Bugs.md` — roll-up line + bug index.** Same idea. Severity and priority are separate columns because
+they are separate axes; `Relates to` links the story the bug came from (`—` when standalone).
+
+```markdown
+🐛 Inbox 2 · 🔍 Triaged 3 · 🔬 Confirmed 1 · 🛠️ In Sprint 2 · ✅ Fixed 14 · ❄️ Deferred / 🚫 Won't fix 1
+
+Open by priority: 🔴 2 · 🟡 3 · 🟢 1
+
+| ID | Title | State | Sev | Pri | Relates to | Assignee |
+|---|---|---|---|---|---|---|
+| [BUG-014](#bug-014) | Safari sign-in does nothing | 🔍 Triaged | major | 🔴 | [US-002](User-Stories.md#us-002) | — |
+| [BUG-009](#bug-009) | Totals off by one cent | 🛠️ In Sprint | minor | 🟡 | — | @rita |
+| [BUG-003](#bug-003) | Avatar upload times out | ✅ Fixed | major | 🔴 | [US-021](User-Stories.md#us-021) | @rita |
+```
+
+**Rules for both index tables** (and the epic dashboard):
+
+- **Every item gets a row, forever** — Delivered / Fixed / Discarded rows are never dropped, so every
+  anchor stays reachable from the top of the file. Nothing is ever deleted.
+- **Row order follows the file's own section order** (active work first, done last):
+  `Ready → In Sprint → Delivered → Paused → Discarded` for stories;
+  `Inbox → Triaged → Confirmed → In Sprint → Fixed → Deferred/Won't fix` for bugs.
+  Within a group, highest priority first, then ID ascending.
+- 🐛 **Inbox bugs have no ID yet** — they are counted in the roll-up but have no table row until
+  `/triage-bug` assigns an ID.
+- 📝 **Draft stories are not in `User-Stories.md`** at all, so they get no row here; they appear only as
+  an index line under their epic in `Epic-Backlog.md`.
+- Unknown / not-yet-set cells are `—`, never invented or left blank.
+- The table is **derived, never hand-typed** — it is rebuilt from the entries below it whenever a
+  command changes an item's state, priority, estimate, assignee, or title. `/ledger-check` flags any
+  row that disagrees with its entry, plus missing or orphaned rows.
 
 ---
 

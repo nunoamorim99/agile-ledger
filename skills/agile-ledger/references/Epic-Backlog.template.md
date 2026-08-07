@@ -11,6 +11,9 @@ Next free ID — EPIC: EPIC-001 · US: US-001 · TASK: TASK-001
 
 ## Overview
 
+_Every epic below, active first (💡 Proposed / 🔨 In Progress → ✅ Done → ❄️ Paused / 🗑️ Discarded), then
+ID ascending. Click an Epic ID to jump to its block. Rows are kept forever._
+
 | Epic | Title | Status | Stories (done/total) | Points (done/total) | Target |
 |---|---|---|---|---|---|
 <!-- | [EPIC-001](#epic-001) | Reference data | 🔨 In Progress | 1/3 | 5/13 | v0.1 | -->

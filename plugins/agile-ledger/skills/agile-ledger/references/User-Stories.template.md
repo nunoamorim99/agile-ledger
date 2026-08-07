@@ -9,13 +9,15 @@
 
 ## Overview
 
-| State | Stories | Points |
-|---|---|---|
-| ✅ Ready | 0 | 0 |
-| 🏃 In Sprint | 0 | 0 |
-| ✅ Delivered | 0 | 0 |
-| ❄️ Paused | 0 | 0 |
-| 🗑️ Discarded | 0 | 0 |
+✅ Ready 0 (0 pts) · 🏃 In Sprint 0 (0 pts) · ✅ Delivered 0 (0 pts) · ❄️ Paused 0 (0 pts) · 🗑️ Discarded 0 (0 pts)
+
+_Every story below, in section order (Ready → In Sprint → Delivered → Paused → Discarded); highest
+priority first within each group. Click an ID to jump to its detail. Rows are kept forever. 📝 Draft
+stories are not listed here — they live only as an index line under their epic in `Epic-Backlog.md`._
+
+| ID | Title | State | Pri | Pts | Epic | Assignee |
+|---|---|---|---|---|---|---|
+<!-- | [US-001](#us-001) | Email signup | ✅ Ready | 🔴 | 5 | [EPIC-001](Epic-Backlog.md#epic-001) | @dev | -->
 
 ---
 
