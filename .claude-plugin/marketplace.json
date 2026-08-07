@@ -9,7 +9,7 @@
     {
       "name": "agile-ledger",
       "source": "./plugins/agile-ledger",
-      "description": "Manage a Scrum backlog of Epics and User Stories, plan and run sprints, drive a board, track velocity, cut Major.Minor releases, and keep GitHub branches/commits/PRs traceable to stories — all from slash commands, no Jira or database.",
+      "description": "Manage a Scrum backlog of Epics and User Stories, plan and run sprints, drive a board, track velocity, cut Major.Minor releases, and keep GitHub branches/commits/PRs traceable to stories — all from slash commands.",
       "version": "1.7.0",
       "author": { "name": "Nuno Amorim", "email": "nuno22amorim@gmail.com", "url": "https://github.com/nunoamorim99" },
       "category": "product-management",
