@@ -1,6 +1,6 @@
 # Project-scope install (whole team)
 
-To give every collaborator on a repository Agile-Ledger automatically, copy
+To give everyone who opens a repository Agile-Ledger automatically, copy
 [`project.settings.json`](project.settings.json) into that repository at:
 
 ```
@@ -9,6 +9,12 @@ To give every collaborator on a repository Agile-Ledger automatically, copy
 
 If the project already has a `.claude/settings.json`, **merge** the two keys
 (`extraKnownMarketplaces` and `enabledPlugins`) into it rather than overwriting the file.
+
+**Which repository?** Since v2.0 the ledger lives in its own **ledger repo** (one folder per code repo),
+so that is the natural home for this file: the plugin travels with the ledger and the code repos stay
+clean. Dropping it into a code repo also works and is a reasonable choice if the developers there run
+`/idea`, `/bug`, or `/my-work` from inside the codebase — it only enables the plugin, it does not put any
+ledger file in the repo. Teammates who prefer nothing committed install at **user** scope instead.
 
 Commit and push. When a teammate opens the repo and trusts the folder, Claude Code prompts them to
 install the `nunoamorim99` marketplace and enable `agile-ledger@nunoamorim99`. Updates ship as normal

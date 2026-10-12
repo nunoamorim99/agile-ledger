@@ -8,13 +8,13 @@
 <p align="center">
   <strong>Plain-Markdown Scrum &amp; Agile product management for Claude Code.</strong><br>
   Run the whole product lifecycle — ideas → backlog → sprint → release, plus bug tracking — from slash
-  commands. No Jira. No database. Just Markdown your whole team can read.
+  commands. Just Markdown your whole team can read.
 </p>
 
 <p align="center">
-  <img alt="version" src="https://img.shields.io/badge/version-1.7-2ea44f">
+  <img alt="version" src="https://img.shields.io/badge/version-2.0-2ea44f">
   <img alt="format" src="https://img.shields.io/badge/storage-plain%20Markdown-0969da">
-  <img alt="commands" src="https://img.shields.io/badge/commands-31%20%2B%20alias-6639ba">
+  <img alt="commands" src="https://img.shields.io/badge/commands-33%20%2B%20alias-6639ba">
   <img alt="deps" src="https://img.shields.io/badge/dependencies-none-cf222e">
   <img alt="license" src="https://img.shields.io/badge/license-MIT-57606a">
 </p>
@@ -24,12 +24,16 @@
 ## Why Agile-Ledger
 
 Distributed teams on different schedules don't need another web app to log into — they need a single,
-readable source of truth that lives **next to the code**. Agile-Ledger keeps your entire product
-management layer as plain Markdown inside the repo: a backlog of epics and user stories, sprints with
-velocity, a bug tracker, releases, and a roadmap. **GitHub holds the code; Agile-Ledger holds the
-"why", joined by the user-story ID** through every branch, commit, and PR.
+readable source of truth. Agile-Ledger keeps your entire product management layer as plain Markdown in a
+**dedicated ledger repository**: one folder per code repo, each with a backlog of epics and user stories,
+sprints with velocity, a bug tracker, releases, and a roadmap. **GitHub holds the code; Agile-Ledger
+holds the "why", joined by the user-story ID** through every branch, commit, and PR.
 
-- **Nothing to host, nothing to sync.** It's text in your repo — diff it, review it, branch it.
+- **Your code repos stay clean.** No PM folder in the codebase: a backlog edit never lands on a
+  developer's working branch, so nobody rebases or pulls to receive bookkeeping.
+- **One place to look.** Every project's ledger sits side by side in one repo you clone once — and one
+  history of PM decisions (`ledger(repo-a): US-014 → Done`).
+- **Nothing to host, nothing to sync.** It's text in a git repo — diff it, review it, branch it.
 - **Readable on anyone's clock.** The board, roadmap, and per-developer views are plain-text snapshots,
   perfect for async teams across time zones.
 - **Clickable in preview.** Every ID is a stable anchor link, so you navigate the backlog by clicking —
@@ -62,7 +66,25 @@ flowchart LR
 ```
 </details>
 
-## The eight files it manages
+## Where it lives
+
+```
+~/Projetos/                      # your workspace root
+├── agile-ledger/                # ← THE LEDGER REPO — its own git repo, cloned once
+│   ├── Registry.md              # which repos are managed, and where their code is
+│   ├── Config.md                # org, commit/push policy, default repo
+│   ├── repo-a/                  # the eight ledger files for repo-a
+│   └── repo-b/
+└── repo-a/ · repo-b/            # the code repos — no ledger files in them
+```
+
+Run `/init-ledger` once, then `/register-repo` for each project. From inside a code repo the skill walks
+up to the sibling ledger and matches the repo by its git remote, so there is nothing to configure and
+nothing to commit into the codebase. Every command also takes `--repo <slug>` to act on another project
+from anywhere. Already running the pre-2.0 layout? `/migrate-ledger` moves an in-repo `Agile-Ledger/`
+folder across verbatim and then offers to clean the code repo on a branch.
+
+## The eight files it manages (per repo)
 
 <p align="center">
   <img src="docs/assets/files.png" alt="The eight files Agile-Ledger manages" width="100%">
@@ -73,7 +95,7 @@ flowchart LR
 
 ```mermaid
 flowchart TD
-  subgraph AL["Agile-Ledger/"]
+  subgraph AL["agile-ledger/<repo-slug>/"]
     direction TB
     I["💡 Ideas.md — idea inbox"]
     E["📚 Epic-Backlog.md — epics + story index"]
@@ -117,7 +139,7 @@ scale, your name, and whether the skill may run `git` in `Definitions.md`.
 | 🟠 **Plan &amp; run the sprint** | `/plan-sprint` · `/start-us` · `/start-bug` · `/review` · `/pr` · `/done-us` · `/done-bug` · `/close-sprint` |
 | 🟣 **Inspect** (read-only) | `/board` (`/standup`) · `/my-work` · `/status` · `/roadmap` · `/guide` · `/ledger-check` · `/sync-main` |
 | 🔴 **Release** | `/release` · `/changelog` |
-| ⚫ **Workspace** (optional) | `/init-workspace` · `/discover-repos` · `/bootstrap-repo` · `/workspace-sync` · `/workspace-status` |
+| ⚫ **Ledger &amp; repos** | `/init-ledger` · `/register-repo` · `/migrate-ledger` · `/ledger-commit` · `/discover-repos` · `/workspace-sync` · `/workspace-status` |
 
 Run **`/guide`** in any session for the command-to-file map and a one-glance state summary. The full
 reference lives in [`plugins/agile-ledger/README.md`](plugins/agile-ledger/README.md), and a printable
@@ -128,6 +150,8 @@ one-page cheat sheet ships as `Agile-Ledger-cheatsheet.pdf`.
 ## Quick start
 
 ```
+/init-ledger                    # once per workspace — creates the ledger repo
+/register-repo .                # add the project you're standing in
 /idea add Google sign-in to speed up onboarding
 /triage                         # → epic + a few suggested Draft stories
 /detail-us US-014               # → full story in User-Stories.md, linked from the epic
@@ -157,15 +181,17 @@ First register the marketplace (once per machine), then install at the scope you
 | Scope | Who gets it | How |
 |---|---|---|
 | **User** (default) | just you, all your projects | `claude plugin install agile-ledger@nunoamorim99 --scope user` |
-| **Project** | every collaborator on this repo | commit a `.claude/settings.json` (below) |
+| **Project** | everyone who opens the ledger repo | commit a `.claude/settings.json` (below) |
 | **Local** | just you, this repo only (gitignored) | `claude plugin install agile-ledger@nunoamorim99 --scope local` |
 
 Or run `/plugin` → **Discover** → select **agile-ledger** → choose a scope in the UI.
 
 ### Project scope — the whole team gets it
 
-Project scope is not really an "install" — it's a file you commit. Add this to the repository your team
-works in (create `.claude/settings.json` if it doesn't exist; **merge** these keys if it does):
+Project scope is not really an "install" — it's a file you commit. Put it in the **ledger repo** (create
+`.claude/settings.json` if it doesn't exist; **merge** these keys if it does), so the plugin travels with
+the ledger and the code repos stay clean. Teammates who want the commands while standing in a code repo
+install at user scope instead:
 
 ```json
 {
@@ -219,8 +245,10 @@ Claude Code (or `/reload-plugins`) so the skills load.
   a stray edit.
 - **Bookkeeping is the job; execution is opt-in.** The skill writes the ledger and *offers* git; it runs
   `git` only when you turn it on, and never pushes, merges, or opens PRs on its own.
-- **Reconstructed ≠ truth.** When the workspace orchestrator infers work from git history, it proposes
-  it as flagged drafts for you to confirm — it never registers guesses as fact.
+- **Reconstructed ≠ truth.** When the skill infers work from git history, it proposes it as flagged
+  drafts for you to confirm — it never registers guesses as fact.
+- **The ledger never writes into your code.** Ledger files only ever live in the ledger repo; the one
+  change the skill offers in a code repo is removing a migrated folder, on a branch, after you confirm.
 - **Read in preview, change via commands.** The Markdown is for reading and navigating; all mutations go
   through the commands so the ledger stays consistent.
 
@@ -233,16 +261,19 @@ The **user-story ID is the join key** between the ledger and GitHub:
 | Branch | `us-014-google-sso` · `bug-014-safari-login` |
 | Commit | `feat(auth): add Google SSO sign-in (US-014)` · `fix(auth): … (BUG-014)` |
 | PR title | `Google SSO sign-in [US-014]` |
+| Ledger commit | `ledger(repo-a): US-014 → Done (sprint 7)` — in the ledger repo |
 
 `/sync-main` reconciles `main` against the ledger and surfaces anything that merged without an ID —
 the off-plan work you'd otherwise miss.
 
-## Optional: the Workspace orchestrator
+## Many repos, one sweep
 
-Install once at a workspace root to manage many repos: `/discover-repos` finds new repositories locally
-and on your GitHub org, `/bootstrap-repo` onboards each one, and `/workspace-sync` runs a single
-cross-repo "what changed while I was away" pass. It **never replaces** a repo's own `Agile-Ledger/` —
-each repo stays its own source of truth — and it only discovers, syncs, and *proposes*.
+Because every project's ledger lives in the same repo, the cross-repo views are free: `/discover-repos`
+finds new repositories locally **and** on your GitHub org (including ones nobody told you about),
+`/register-repo` onboards each one, `/workspace-sync` runs a single "what changed while I was away" pass
+over every managed repo, and `/workspace-status` is a portfolio dashboard that reads only the ledger —
+so it works on a laptop with none of the code checked out. Discovery, cloning, and reconstructed drafts
+are always *proposed* and confirmed first.
 
 ---
 
@@ -253,10 +284,10 @@ agile-ledger/
 ├── .claude-plugin/marketplace.json      # marketplace catalog
 ├── plugins/agile-ledger/                # ← the plugin: single source of truth
 │   ├── .claude-plugin/plugin.json       # plugin manifest
-│   ├── commands/                        # 31 slash commands (+ /standup alias)
+│   ├── commands/                        # 33 slash commands (+ /standup alias)
 │   └── skills/
-│       ├── agile-ledger/                # core skill — SKILL.md + references/ (8 templates)
-│       └── agile-ledger-workspace/      # optional multi-repo orchestrator
+│       ├── agile-ledger/                # core skill — SKILL.md + references/ (10 templates)
+│       └── agile-ledger-workspace/      # owns the ledger repo, the Registry, and cross-repo sweeps
 ├── scripts/build_bundles.py             # builds the release zips from the plugin
 ├── install/                             # project-scope settings.json for teams
 ├── docs/assets/                         # README images (cover, group banners)

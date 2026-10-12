@@ -11,7 +11,7 @@ Drop the Higgsfield-generated images here with these exact filenames so the READ
 | `group-sprint.png` | LinkedIn / optional README | a kanban board in motion (amber) |
 | `group-inspect.png` | LinkedIn / optional README | dashboards & status views (purple) |
 | `group-release.png` | LinkedIn / optional README | shipping a release (red) |
-| `group-workspace.png` | LinkedIn / optional README | orchestrating many repos (gray) |
+| `group-workspace.png` | LinkedIn / optional README | the ledger repo + many managed repos (gray) |
 | `groups.png` | optional README strip | the 7 group images composited side by side |
 
 All generated with Higgsfield. Keep a consistent palette: green=capture/triage, blue=backlog,

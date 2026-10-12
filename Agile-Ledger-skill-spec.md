@@ -13,6 +13,11 @@
 > **Agile-Ledger for the product-management layer** (backlog, stories, sprints, the board, releases).
 > The two are stitched together by one join key — the **User Story ID** — which travels through every
 > branch, commit, and PR so the ledger and the codebase always agree.
+>
+> **Superseded on placement (v2.0).** This document describes the ledger as a folder inside the host
+> project, which is how v1 shipped. Since v2.0 the ledger lives in a **separate ledger repository** with
+> one folder per code repo. Every rule below still holds; only the path changes
+> (`Agile-Ledger/X.md` → `<ledger-root>/<repo-slug>/X.md`). See **Addendum — v2.0** at the end.
 
 ---
 
@@ -518,7 +523,8 @@ what stops PRs from churning during testing — they open clean and approve fast
 
 ## 17. File & folder structure
 
-**Runtime (inside a host project):**
+**Runtime (v1 — inside a host project; superseded by the v2.0 addendum, which moves this tree into
+`<ledger-root>/<repo-slug>/`):**
 ```
 Agile-Ledger/
 ├── Backlog.md           # 📥 Inbox + epics, each with its nested stories (shaping states + epic History)
@@ -733,3 +739,57 @@ Command count: 31 commands + 1 alias (`/standup`).
   (`git fetch/log/diff/status/branch/show`) — so it can never push, merge, or run arbitrary shell.
   Note: `allowed-tools` can't say "edit Markdown but not code", so `/find-bug`'s no-code-edit rule stays
   prompt-enforced; the guard it adds is the removal of shell execution.
+
+---
+
+## Addendum — v2.0: the ledger moves to its own repository
+
+The one structural change since v1: **the ledger is no longer a folder inside the code repo.** It lives
+in a dedicated **ledger repository** holding one folder per code repo.
+
+```
+<workspace-root>/
+├── agile-ledger/                 # THE LEDGER REPO — its own git repo
+│   ├── Registry.md               # marker + map: repo slug ↔ code path ↔ remote ↔ sync state
+│   ├── Config.md                 # org, clone target, filters, commit/push policy, default repo
+│   ├── repo-a/                   # the eight ledger files for repo-a
+│   └── repo-b/
+└── repo-a/ · repo-b/             # the code repos — no ledger files in them
+```
+
+**Why.** Two reasons, both from running v1 for months:
+
+1. **A PM edit shouldn't reach a developer's branch.** With the ledger inside the code repo, every
+   triage, board move, and release note is a commit on the branch the team is building on — so
+   developers pull or rebase to receive bookkeeping that has nothing to do with their change, and PM
+   commits interleave with code history.
+2. **One place to look.** Ledger files for every project sit side by side in one repo you clone once.
+   `/workspace-status` becomes a portfolio view that needs no code checked out at all, and the ledger
+   repo's history is a clean record of PM decisions (`ledger(repo-a): US-014 → Done (sprint 7)`).
+
+**Locked decisions**
+
+| # | Decision | Choice |
+|---|---|---|
+| 1 | Placement | **Central ledger repo replaces** the in-repo folder. One model, not a configurable pair |
+| 2 | Identifying a ledger root | A `Registry.md` whose first heading is `# Agile-Ledger Registry` — **never** the folder name |
+| 3 | Finding the ledger from a code repo | **Walk up** from the cwd, checking each level *and its children*; stop at `$HOME`. Nothing is written into the code repo — no marker file, no config |
+| 4 | Identifying the code repo | Normalized **git remote** matched against `Registry.md` (path and folder name are fallbacks only) |
+| 5 | Scoping | `--repo <slug>` on any command; `default_repo` in `Config.md` when run from the ledger root |
+| 6 | Ledger commits | `ledger_commit: confirm` (default) · `auto` · `off`; message `ledger(<slug>): <what changed>`; **`ledger_push: off`** by default and every push confirmed |
+| 7 | Upgrade path | `/migrate-ledger` copies an in-repo folder across **verbatim**, verifies it, then offers to `git rm` it on a branch — never pushing |
+| 8 | Cross-repo scope | Each repo folder keeps its own backlog, sprint, and velocity. Cross-repo references are links (`../repo-b/User-Stories.md#us-021`); there is no shared sprint |
+
+**Commands.** `+/init-ledger`, `+/register-repo`, `+/migrate-ledger`, `+/ledger-commit`;
+`/init-workspace` and `/bootstrap-repo` are retired (replaced by the first two). `/sync-main` and
+`/workspace-sync` now read git in the **code** repo and write only in the **ledger** folder. Count: 33
+commands + 1 alias (`/standup`).
+
+**What did not change.** The ID system, the two state machines, the two-file story model, the overview
+tables, anchors and links, duplicate detection, epic version control, estimation/velocity, vertical
+slicing, the git/traceability conventions for code, and every never-delete / confirm-first invariant.
+In-folder links between ledger files are unchanged, because the eight files are still siblings.
+
+**Safety added.** Two new hard rules: **never write a ledger file into a code repo** (if a command is
+about to, the resolution was wrong — stop and resolve again), and **migration copies and verifies before
+anything is removed**, with per-file conflict reporting instead of a silent merge when both copies exist.

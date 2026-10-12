@@ -5,8 +5,8 @@ always Drafts for a human to `/triage` — never confirmed Epics/Stories, never 
 
 ## Hard guardrails (do not cross)
 
-1. **Proposals only.** Everything lands in the target repo's `Agile-Ledger/Epic-Backlog.md` **📥 Inbox**,
-   each line flagged `🔍 reconstructed from git (<commit/PR ref>) — needs review`.
+1. **Proposals only.** Everything lands in the target repo folder's `Ideas.md` **💡 Inbox**
+   (`<ledger-root>/<repo-slug>/Ideas.md` — never inside the code repo), each line flagged `🔍 reconstructed from git (<commit/PR ref>) — needs review`.
 2. **Never invent value or acceptance criteria.** Commit messages describe *implementation*, not user
    value. Do not fabricate a "so that…" or Given/When/Then. If the value is unclear, write
    `value: ?? (confirm at triage)` rather than guessing.

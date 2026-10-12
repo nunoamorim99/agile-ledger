@@ -8,18 +8,25 @@ description: >-
   planning, standup, board, story points, velocity, acceptance criteria, definition of done/ready,
   release, changelog, roadmap, or wants to capture / triage / detail / ship a product idea, plan a
   sprint, open a PR for a story, or check what merged to main — even if they don't say "Agile-Ledger"
-  explicitly. The `Agile-Ledger/` folder of Markdown files is the single source of truth; keep it true.
+  explicitly. The ledger lives in its own **ledger repository**, one folder per code repo, so code
+  repos stay clean: `<ledger-repo>/<repo-slug>/*.md` is the single source of truth; keep it true.
 ---
 
 # Agile-Ledger
 
-A product-management system made of plain-Markdown files in an `Agile-Ledger/` folder, applying the
-Scrum framework so a Product Manager runs the whole lifecycle — backlog → sprint → increment → release
-— from the command line, and shares the result with developers who don't need to learn a new tool.
+A product-management system made of plain-Markdown files, applying the Scrum framework so a Product
+Manager runs the whole lifecycle — backlog → sprint → increment → release — from the command line, and
+shares the result with developers who don't need to learn a new tool.
 
 **Two-layer model.** The team uses **GitHub for code** (branches, commits, PRs, merges) and
 **Agile-Ledger for the PM layer** (backlog, stories, sprints, board, releases). The two are stitched
 together by one join key — the **User Story ID** — which travels through every branch, commit, and PR.
+
+**Two repositories, one join key.** The PM layer lives in a **separate ledger repository** that holds
+one folder per code repo. A code repo contains **no ledger files at all**: PM bookkeeping never lands
+in the branch a developer is building on, so nobody rebases or pulls to receive a backlog edit, and
+everyone reads the whole portfolio in one place. See **Where the ledger lives** below — resolve it
+before any read or write.
 
 **Priority of duties, always in this order:**
 1. **Bookkeeping is the job** — keep the backlog, sprint, board, and release record true.
@@ -34,6 +41,11 @@ language matches ("new story", "let's plan the sprint", "what merged to main"), 
 ## Golden invariants (never violate)
 
 - **Plain Markdown only.** No database, no dependencies. This is why a no-Jira team can adopt it.
+- **Never write ledger files into a code repo.** Every ledger file belongs to `<ledger-root>/<repo-slug>/`.
+  If a command would create or edit Markdown inside the code repo you are standing in, you resolved the
+  ledger wrong — stop and resolve again.
+- **Resolve the ledger before the first read or write** of a session (see **Where the ledger lives**),
+  and state the resolution in one line (`Ledger: ~/Projetos/agile-ledger → repo-a`). Never guess a path.
 - **Never delete.** Nothing is removed — delivered, paused, and discarded items are kept forever;
   discarded items keep *why* they were rejected.
 - **State = physical position, moved only by a command.** A status change is a move between sections
@@ -53,15 +65,79 @@ language matches ("new story", "let's plan the sprint", "what merged to main"), 
   lowercase `us-014`; matching ignores case.
 - **Epic status and rollups are derived from children**, never hand-set.
 - **Confirm before any merge or push.** Git execution is opt-in (see Git conventions). Never auto-merge.
-- **Session start:** read all `Agile-Ledger/*.md` files first, load state silently, give at most a
-  one-line orientation.
+  This covers the ledger repo too: `ledger_commit` may commit, but pushing is always confirmed.
+- **Session start:** resolve the ledger, read all `<ledger-root>/<repo-slug>/*.md` files first, load
+  state silently, give at most a one-line orientation (including which ledger and repo you resolved).
+
+---
+
+## Where the ledger lives (resolve this first)
+
+```
+<workspace-root>/                 e.g. ~/Projetos/
+├── agile-ledger/                 ← THE LEDGER REPO — its own git repo, pushed like any other
+│   ├── Registry.md               # the marker + the map: repo slug ↔ code path ↔ remote ↔ sync state
+│   ├── Config.md                 # ledger-wide config (org, commit/push policy, default repo)
+│   ├── repo-a/                   # one folder per code repo — the eight ledger files
+│   │   ├── Ideas.md … Definitions.md
+│   └── repo-b/
+└── repo-a/ · repo-b/             ← the code repos, with NO ledger files in them
+```
+
+A **ledger root** is a directory containing a `Registry.md` whose first heading is
+`# Agile-Ledger Registry`. That heading is the marker — never identify the ledger by folder name.
+
+**Resolution order** (run once per session, then cache it):
+
+1. An explicit **`--repo <slug>`** argument on the command wins, as does an explicit path the user gives.
+2. If the cwd is **inside a ledger root**, the active repo is the folder you are in; at the root itself
+   use `default_repo` from `Config.md`, and if that is unset, ask.
+3. Otherwise **walk up** from the cwd (the cwd, then each ancestor, stopping at the home directory):
+   at each level check that directory *and its immediate children* for a ledger root. First hit wins.
+4. **Identify the code repo** against `Registry.md`: match `git remote get-url origin` normalized
+   (drop scheme, credentials, trailing `.git`; compare host + path case-insensitively), else the
+   absolute code path, else the folder name. The remote is the strongest key — a folder rename does
+   not break it, so prefer it and refresh the stale path column when they disagree.
+   **Without a shell**: the read-only commands (`/board`, `/status`, `/roadmap`, `/my-work`, `/guide`,
+   `/changelog`) declare `allowed-tools` that exclude Bash, so they cannot read the git remote. They
+   match the **cwd path, then the folder name** against `Registry.md` instead, and ask when that is
+   ambiguous — never guess a repo for a command that is about to print someone's sprint.
+5. **No ledger root found** → say so and offer `/init-ledger`. **Found but this repo is unregistered**
+   → offer `/register-repo .`. Never silently scaffold a ledger root somewhere you guessed.
+6. **A legacy `Agile-Ledger/` folder inside the code repo** (the pre-2.0 layout) → report it once and
+   offer `/migrate-ledger`. If a central folder for the repo *also* exists, treat the **central one as
+   the source of truth**, do not merge silently, and tell the user the in-repo copy is now stale.
+
+State the resolution in one line before working, e.g. `Ledger: ~/Projetos/agile-ledger → repo-a`. Every
+file path below is relative to `<ledger-root>/<repo-slug>/`, so the in-folder links between files are
+unchanged. Cross-repo references are possible and written as `../repo-b/User-Stories.md#us-021`.
+
+---
+
+## Committing to the ledger repo
+
+The ledger repo is a git repo; keeping its history clean is part of the bookkeeping. `Config.md` sets
+the policy — `ledger_commit: confirm` (default) · `auto` · `off`, and `ledger_push: off` (default) ·
+`confirm`.
+
+- After a command finishes writing, **offer one commit** covering that command's writes, scoped to the
+  repo folder: `ledger(repo-a): US-014 → Done (sprint 7)`. Under `auto`, commit without asking; under
+  `off`, leave the files dirty and say so.
+- **Push only** when `ledger_push: confirm` *and* the user confirms this push. Never force-push, never
+  rewrite ledger history, never open a PR against the ledger repo on your own.
+- Commit the **ledger repo only**. A command that also touches the code repo (a branch for a story, the
+  legacy-folder removal in `/migrate-ledger`) keeps those changes in a separate commit there, under the
+  existing `git_execution` rule.
+- One command, one commit. Do not bundle unrelated repos' folders into a single ledger commit.
 
 ---
 
 ## Files & where things live
 
+Inside `<ledger-root>/<repo-slug>/`:
+
 ```
-Agile-Ledger/
+<repo-slug>/
 ├── Ideas.md             # 💡 idea inbox — raw captures from /idea. Triage promotes them out of here.
 ├── Epic-Backlog.md      # Epics, each with a lightweight STORY INDEX. Epic dashboard table on top.
 ├── User-Stories.md      # full detail for Ready+ stories, grouped by state. State-summary table on top.
@@ -110,8 +186,10 @@ separately in `Ideas.md` until `/triage` promotes them, so the epic backlog stay
   hand-typed**: any command that changes an item's state, priority, estimate, assignee, or title rebuilds
   the affected table(s). Exact shapes in `references/entry-templates.md`.
 
-If a project starts with no `Agile-Ledger/` folder, scaffold all eight files from the
-`references/*.template.md` files before doing anything else.
+If the resolved repo folder does not exist yet inside the ledger root, scaffold all eight files from the
+`references/*.template.md` files and add the repo's Registry row before doing anything else. If there is
+no ledger root at all, scaffold that first (`Registry.md` + `Config.md` from their templates) — that is
+`/init-ledger`, and it is the one thing to do before any capture.
 
 ---
 
@@ -137,8 +215,8 @@ If a project starts with no `Agile-Ledger/` folder, scaffold all eight files fro
 Every registered entry's **heading is its bare ID** — `### EPIC-005`, `#### US-014`, `### BUG-014` — and
 the human-readable **title goes on the line just below**. This gives each entry a stable lowercase anchor
 (`#epic-005`, `#us-014`, `#bug-014`) that the Markdown preview generates automatically and that **does not
-change when the title changes**. Reference any item as a relative file+anchor link (same `Agile-Ledger/`
-folder):
+change when the title changes**. Reference any item as a relative file+anchor link (same repo folder
+in the ledger):
 
 - `[US-014](User-Stories.md#us-014)` · `[EPIC-005](Epic-Backlog.md#epic-005)` · `[BUG-014](Bugs.md#bug-014)`
 - Anchor = the **ID lowercased** (hyphen kept). Within the same file you may shorten to `[EPIC-005](#epic-005)`.
@@ -213,6 +291,23 @@ Inbox → /triage → Draft → /detail-us → Ready
 ## Commands
 
 Thin entry points; the rules below are authoritative. Always re-read the target file before writing.
+
+**Every command accepts `--repo <slug>`** to target a repo other than the resolved one — the way to work
+on `repo-b`'s backlog while standing in `repo-a` or in the ledger repo itself. Without it, the resolution
+order above decides.
+
+### Set up the ledger
+
+The ledger repo and its registry belong to the **Agile-Ledger Workspace** skill; these four commands are
+listed here because they gate everything else.
+
+- **`/init-ledger [path]`** — Create the ledger repo: `Registry.md` + `Config.md` from the templates,
+  `git init` offered, nothing else. Run once per workspace.
+- **`/register-repo <path|remote> [--from-git]`** — Add a code repo: create `<ledger-root>/<slug>/` with
+  the eight files and a Registry row. Writes nothing into the code repo.
+- **`/migrate-ledger [path]`** — Move a pre-2.0 in-repo `Agile-Ledger/` folder into the ledger repo
+  verbatim, then offer to remove it from the code repo on a branch (confirmed; never pushed).
+- **`/ledger-commit`** — Review the ledger repo's diff and commit it (push only on confirmation).
 
 ### Capture & shape the backlog
 
@@ -295,7 +390,9 @@ Thin entry points; the rules below are authoritative. Always re-read the target 
   recorded in the Increment; **move unfinished stories back to `## ✅ Ready` in `User-Stories.md` (reset
   epic index) and unfinished bugs back to 🔬 Confirmed in `Bugs.md`**, clearing both from `Sprint.md`;
   append the closed sprint + its **velocity** to `Sprints-History.md`; refresh the tables; offer retro notes.
-- **`/sync-main`** — Read-only reconcile of git `main` vs. the ledger. Fetch main, list merges since
+- **`/sync-main`** — Read-only reconcile of git `main` vs. the ledger. **Reads git in the code repo,
+  writes only in the ledger folder** — so it needs the code path from `Registry.md` (or the cwd) and the
+  resolved ledger folder at the same time. Fetch main, list merges since
   the `Last main sync` cursor in `Sprint.md`, map each commit to its **US or BUG** id via the
   bracketed/parenthesized id (case-insensitive), and flag: (1) **merged but ledger not Done/Fixed** →
   propose marking it + filling the Increment; (2) **merged with no id** → the off-plan surprise; surface
@@ -397,6 +494,11 @@ with `BUG-` and a `fix` commit type.
 | Branch | `us-014-google-sso` · `bug-014-safari-login` | lowercase, **no type prefix**, ID + slug |
 | Commit | `feat(auth): add Google SSO sign-in (US-014)` · `fix(auth): … (BUG-014)` | Conventional Commits — type **kept** |
 | PR title | `Google SSO sign-in [US-014]` · `Fix Safari login [BUG-014]` | **no type**, ID in brackets |
+| Ledger commit | `ledger(repo-a): US-014 → Done (sprint 7)` | in the **ledger repo**; scope = repo slug |
+
+The first three live in the **code repo**; the ledger commit lives in the **ledger repo**. Keeping the
+repo slug as the ledger commit's scope makes `git log --oneline --grep "^ledger(repo-a)"` the per-project
+history of PM decisions.
 
 - Match IDs **case-insensitively** (`US-014` ↔ `us-014` ↔ `[US-014]` ↔ `(US-014)`; same for `BUG-`).
 - **Squash-merge note:** a squash subject inherits the type-less PR title, so it won't parse as a
@@ -417,7 +519,9 @@ with `BUG-` and a `fix` commit type.
   PR body · commit · delivery note.
 - `references/Ideas.template.md`, `Epic-Backlog.template.md`, `User-Stories.template.md`, `Bugs.template.md`, `Sprint.template.md`,
   `Sprints-History.template.md`, `Releases.template.md`, `Definitions.template.md` — the eight scaffold
-  files to write when a fresh `Agile-Ledger/` folder is created.
+  files to write when a fresh `<ledger-root>/<repo-slug>/` folder is created.
+- `references/Registry.template.md`, `references/Config.template.md` — the two ledger-root files, written
+  once by `/init-ledger`.
 
 Read the relevant template before scaffolding or registering, so shapes are never re-derived.
 
@@ -426,5 +530,7 @@ Read the relevant template before scaffolding or registering, so shapes are neve
 ## Deliberately NOT included
 
 Story-level versioning (epic-level only); tasks by default; the skill facilitating ceremonies (it
-produces the *material* for them); heavy burndown-style dashboards; hard-coded git providers/stacks.
+produces the *material* for them); heavy burndown-style dashboards; hard-coded git providers/stacks;
+**epics or sprints that span repos** — each repo folder keeps its own backlog, sprint, and velocity, and
+cross-repo work is linked (`../repo-b/User-Stories.md#us-021`), never merged into one shared sprint.
 If rigor is added later it must stay opt-in and must never slow down `/idea`.

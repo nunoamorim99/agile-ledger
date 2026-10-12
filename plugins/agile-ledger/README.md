@@ -1,11 +1,32 @@
 # Agile-Ledger (plugin)
 
 Plain-Markdown Scrum/Agile product management for Claude Code. The rules live in
-`skills/agile-ledger/SKILL.md`; the commands below delegate to it. State is stored in an `Agile-Ledger/`
-folder in your project — plain Markdown, no database. Read in the Markdown preview (IDs are clickable
-links); make changes through the commands.
+`skills/agile-ledger/SKILL.md`; the commands below delegate to it. State is stored in a dedicated
+**ledger repository** holding one folder per code repo — plain Markdown, no database, and **no ledger
+files inside your code repos**. Read in the Markdown preview (IDs are clickable links); make changes
+through the commands.
+
+```
+~/Projetos/
+├── agile-ledger/            # the ledger repo (its own git repo)
+│   ├── Registry.md          # which repos are managed, and where their code is
+│   ├── Config.md            # org, commit/push policy, default repo
+│   ├── repo-a/              # the eight ledger files for repo-a
+│   └── repo-b/
+└── repo-a/ · repo-b/        # the code repos — clean
+```
+
+Run `/init-ledger` once, then `/register-repo` per project (or `/migrate-ledger` to move a pre-2.0
+in-repo ledger across). From inside a code repo the skill finds the sibling ledger automatically; every
+command also takes `--repo <slug>` to act on another project.
 
 ## Commands
+
+**Set up the ledger**
+- `/init-ledger [path]` — create the ledger repo (`Registry.md` + `Config.md`); run once per workspace
+- `/register-repo <path|remote> [--from-git]` — add a code repo: its folder, the eight files, a Registry row
+- `/migrate-ledger [path]` — move a pre-2.0 in-repo `Agile-Ledger/` into the ledger repo, then clean the code repo
+- `/ledger-commit` — review and commit the ledger repo (push only on confirmation)
 
 **Capture**
 - `/idea <text>` — drop a raw idea into `Ideas.md` (instant, any language, safe mid-work)
@@ -45,27 +66,27 @@ links); make changes through the commands.
 - `/release [version]` — cut a Major.Minor version from the Increment
 - `/changelog` — derive release notes (Added/Changed + Fixed)
 
-**Workspace — optional multi-repo orchestrator** *(phase 2)*
-- `/init-workspace` — set up the orchestrator (Registry + Config) at a workspace root
-- `/discover-repos` — detect new repos locally **and** on your GitHub org; propose clone + bootstrap
-- `/bootstrap-repo <path> [--from-git]` — onboard one repo; optionally seed proposed drafts from git history
+**Across every managed repo**
+- `/discover-repos` — detect new repos locally **and** on your GitHub org; propose clone + register
 - `/workspace-sync` — one-command "what changed while I was away" across every managed repo
-- `/workspace-status` — dashboard across all managed repos
+- `/workspace-status` — dashboard across all managed repos (reads the ledger repo only)
 
-The Workspace layer never replaces the per-repo ledger — each repo keeps its own `Agile-Ledger/` as the
-source of truth. It only discovers, syncs, and *proposes* (cloning, committing, and reconstructed
-backlog drafts are always confirmed first; it never pushes, opens PRs, or merges). See
-`skills/agile-ledger-workspace/SKILL.md`.
+These live in the second skill, `skills/agile-ledger-workspace/SKILL.md`, which owns the ledger repo and
+the Registry. It discovers, syncs, and *proposes*: cloning, committing, and reconstructed backlog drafts
+are always confirmed first, it never writes into a code repo (except removing a migrated folder, on a
+branch, after you confirm), and it never pushes, opens PRs, or merges on its own.
 
 Several read-only commands (`/board`, `/status`, `/roadmap`, `/guide`, `/my-work`, `/changelog`) declare
 `allowed-tools` so they physically cannot modify files; `/find-bug` and `/sync-main` are likewise
-restricted from executing arbitrary shell. Installed via a marketplace, commands are namespaced
-(e.g. `/agile-ledger:idea`, `/agile-ledger:workspace-sync`).
+restricted from executing arbitrary shell. `/ledger-commit` is limited to git in the ledger repo. Installed via a marketplace, commands are
+namespaced (e.g. `/agile-ledger:idea`, `/agile-ledger:workspace-sync`).
 
 ## Files it manages
 
-`Agile-Ledger/Ideas.md` · `Epic-Backlog.md` · `User-Stories.md` · `Bugs.md` · `Sprint.md` ·
-`Sprints-History.md` · `Releases.md` · `Definitions.md`. Edit `Definitions.md` to configure language,
-estimation scale, your name, and git execution.
+Per repo, inside `<ledger-repo>/<repo-slug>/`: `Ideas.md` · `Epic-Backlog.md` · `User-Stories.md` ·
+`Bugs.md` · `Sprint.md` · `Sprints-History.md` · `Releases.md` · `Definitions.md`. Edit that repo's
+`Definitions.md` to configure language, estimation scale, your name, and git execution in the code repo.
+At the ledger root: `Registry.md` (the repo map, and the marker that identifies a ledger) and `Config.md`
+(org, clone target, and the ledger repo's own commit/push policy).
 
 See the repository README for install options and `SKILL.md` for the full rules.

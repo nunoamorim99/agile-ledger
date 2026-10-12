@@ -14,7 +14,9 @@ Me:                        # your name, used by /my-work when no name is given
 ```
 
 > `git_execution: off` is the safe default. Even when `on`, the skill **never auto-merges** and always
-> confirms before any push or merge.
+> confirms before any push or merge. This key covers git in **this project's code repo**; a value set
+> here overrides the ledger-wide default in the ledger root's `Config.md`. Commits in the **ledger repo**
+> are governed separately by `ledger_commit` / `ledger_push` in that `Config.md`.
 
 ---
 
