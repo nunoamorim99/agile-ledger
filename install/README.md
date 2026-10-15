@@ -22,7 +22,7 @@ pull requests to this file.
 
 ## The two keys, and why both are needed
 
-- `extraKnownMarketplaces` — tells the project where the marketplace lives (your GitHub repo). Without it,
+- `extraKnownMarketplaces` — tells the project where the marketplace lives (`nunoamorim99/claude-skills`, the catalog of all Nuno Amorim's plugins). Without it,
   a project-scope `enabledPlugins` entry points at a marketplace the project doesn't know, which is the
   usual cause of a project-scope install error.
 - `enabledPlugins` — turns the plugin on, using the `"<plugin>@<marketplace>": true` format

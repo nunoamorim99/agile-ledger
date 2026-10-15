@@ -167,14 +167,14 @@ one-page cheat sheet ships as `Agile-Ledger-cheatsheet.pdf`.
 First register the marketplace (once per machine), then install at the scope you want:
 
 ```
-/plugin marketplace add nunoamorim99/agile-ledger
+/plugin marketplace add nunoamorim99/claude-skills
 ```
 
 > Two different names are in play here, and mixing them up is the usual cause of a failed install:
-> `nunoamorim99/agile-ledger` is the **GitHub `owner/repo`**, while `@nunoamorim99` is the **marketplace
-> name** — the `name` field in `.claude-plugin/marketplace.json`. The install format is always
-> `<plugin-name>@<marketplace-name>`, i.e. `agile-ledger@nunoamorim99`. The marketplace name here is the
-> author handle so every skill installs as `<skill>@nunoamorim99`.
+> `nunoamorim99/claude-skills` is the **GitHub `owner/repo`** of the catalog, while `@nunoamorim99` is the
+> **marketplace name**. The install format is always `<plugin-name>@<marketplace-name>`, i.e.
+> `agile-ledger@nunoamorim99`. One marketplace serves all of Nuno Amorim's plugins, so every one installs
+> as `<plugin>@nunoamorim99` — see [claude-skills](https://github.com/nunoamorim99/claude-skills).
 
 ### Scopes
 
@@ -197,7 +197,7 @@ install at user scope instead:
 {
   "extraKnownMarketplaces": {
     "nunoamorim99": {
-      "source": { "source": "github", "repo": "nunoamorim99/agile-ledger" }
+      "source": { "source": "github", "repo": "nunoamorim99/claude-skills" }
     }
   },
   "enabledPlugins": {
@@ -281,8 +281,7 @@ are always *proposed* and confirmed first.
 
 ```
 agile-ledger/
-├── .claude-plugin/marketplace.json      # marketplace catalog
-├── plugins/agile-ledger/                # ← the plugin: single source of truth
+├── plugins/agile-ledger/                # ← the plugin: single source of truth (listed in nunoamorim99/claude-skills)
 │   ├── .claude-plugin/plugin.json       # plugin manifest
 │   ├── commands/                        # 33 slash commands (+ /standup alias)
 │   └── skills/
@@ -297,7 +296,7 @@ agile-ledger/
 └── LICENSE
 ```
 
-Everything ships from `plugins/agile-ledger/`. The marketplace serves it directly, and the downloadable
+Everything ships from `plugins/agile-ledger/`. The [`nunoamorim99`](https://github.com/nunoamorim99/claude-skills) marketplace serves it directly, and the downloadable
 zips on the [releases page](https://github.com/nunoamorim99/agile-ledger/releases/latest) are built from
 it on each tag — so there is only ever one copy to edit. See [CONTRIBUTING.md](CONTRIBUTING.md).
 
